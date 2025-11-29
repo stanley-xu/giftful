@@ -99,8 +99,9 @@ export default function ProfileLayout() {
         name="index"
         options={{
           headerShown: true,
-          title: "",
+          headerShadowVisible: false,
           headerTransparent: true,
+          title: "",
           headerRight: () => <ShareButton />,
           headerLeft: () => <BottomSheetButton />,
         }}

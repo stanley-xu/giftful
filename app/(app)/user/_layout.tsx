@@ -7,19 +7,14 @@ export default function UserLayout() {
     <FollowingProvider>
       <Stack
         screenOptions={{
+          headerShown: true,
           headerBackButtonDisplayMode: "minimal",
           headerShadowVisible: false,
-          headerShown: true,
           headerLargeTitle: true,
+          headerTransparent: true,
         }}
       >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "Following",
-            headerTransparent: true,
-          }}
-        />
+        <Stack.Screen name="index" options={{ title: "Following" }} />
         <Stack.Screen name="[userId]" />
       </Stack>
     </FollowingProvider>

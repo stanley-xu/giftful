@@ -172,14 +172,6 @@ export default function UserProfileScreen() {
     );
 
     navigation.setOptions({
-      headerTransparent: true,
-      // headerBlurEffect: "regular",
-      headerLargeTitleStyle: {
-        color: text.black,
-      },
-      headerTitleStyle: {
-        color: text.black,
-      },
       title: firstName,
       headerRight: () => (
         <View style={{ flexDirection: "row", gap: 4 }}>
