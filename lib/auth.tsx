@@ -1,4 +1,6 @@
 import { supabase } from "@/supabase/client";
+import { type Session } from "@supabase/supabase-js";
+import * as Linking from "expo-linking";
 import {
   type PropsWithChildren,
   createContext,
@@ -10,7 +12,6 @@ import {
 } from "react";
 
 import { auth, auth as authHelpers, profiles } from "@/lib/api";
-import { type Session } from "@supabase/supabase-js";
 import { Profile } from "./schemas";
 
 type SignInArgs = { email: string; password: string };
@@ -125,6 +126,44 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
+
+  // Handle deep links for email verification
+  // When user clicks email verification link, Supabase redirects to giftful://welcome#access_token=...&refresh_token=...
+  useEffect(() => {
+    const extractSessionFromUrl = async (url: string) => {
+      // Only process auth callback URLs (contain token fragment)
+      const hashIndex = url.indexOf("#");
+      if (hashIndex === -1) return;
+
+      const params = new URLSearchParams(url.slice(hashIndex + 1));
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      // Not an auth callback URL
+      if (!access_token || !refresh_token) return;
+
+      console.debug("[Deep Link] Extracting session from URL");
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      if (error) {
+        console.error("[Deep Link] Failed to set session:", error.message);
+      }
+    };
+
+    // Check if app was opened from a deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) extractSessionFromUrl(url);
+    });
+
+    // Handle deep links while app is running
+    const subscription = Linking.addEventListener("url", (e) =>
+      extractSessionFromUrl(e.url)
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     // Handling loading states manually for now
