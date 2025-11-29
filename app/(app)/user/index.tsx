@@ -18,7 +18,13 @@ function FollowingItem({ profile }: { profile: Profile }) {
     .join("");
 
   return (
-    <Link href={routes.user(profile.id) as any} asChild>
+    <Link
+      href={{
+        pathname: routes.user(profile.id) as any,
+        params: { name: profile.name, isFollowing: "true" },
+      }}
+      asChild
+    >
       <Pressable style={styles.item}>
         <View style={styles.avatar}>
           <Text variant="semibold" fontSize="lg" style={{ color: text.white }}>

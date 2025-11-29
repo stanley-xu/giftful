@@ -2,15 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Keyboard,
   Pressable,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 import {
@@ -41,12 +37,11 @@ export default function ProfileScreen() {
   const firstName = profile.name.split(" ")[0];
 
   const {
-    gesture,
-    animatedProfileCardStyle,
+    animatedOverlayStyle,
     animatedSpacerStyle,
     animatedChevronStyle,
     toggleExpand,
-    isCollapsed,
+    isExpanded,
   } = useCollapsibleHeader({ cardHeight: PROFILE_CARD_HEIGHT });
 
   const navigation = useNavigation();
@@ -72,7 +67,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, isCollapsed, toggleExpand, animatedChevronStyle, firstName]);
+  }, [navigation, isExpanded, toggleExpand, animatedChevronStyle, firstName]);
 
   const {
     wishlists,
@@ -109,8 +104,8 @@ export default function ProfileScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ScrollView
-        contentInsetAdjustmentBehavior="never"
+      <Animated.ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
         style={{ backgroundColor: colours.background }}
         contentContainerStyle={{ paddingBottom: 50 }} // Pad main content due to native tabs
@@ -129,19 +124,18 @@ export default function ProfileScreen() {
             />
           </View>
         </Pressable>
-      </ScrollView>
+      </Animated.ScrollView>
 
-      <GestureDetector gesture={gesture}>
-        <Animated.View
-          style={[styles.profileCardContainer, animatedProfileCardStyle]}
-        >
-          <ProfileCard
-            profile={profile}
-            cardHeight={PROFILE_CARD_HEIGHT}
-            onUpdate={handleProfileUpdate}
-          />
-        </Animated.View>
-      </GestureDetector>
+      <Animated.View
+        style={[styles.profileCardContainer, animatedOverlayStyle]}
+        pointerEvents={isExpanded ? "auto" : "none"}
+      >
+        <ProfileCard
+          profile={profile}
+          cardHeight={PROFILE_CARD_HEIGHT}
+          onUpdate={handleProfileUpdate}
+        />
+      </Animated.View>
 
       <View style={[styles.bottomButtonWrapper, { bottom: bottom + 60 }]}>
         <Button

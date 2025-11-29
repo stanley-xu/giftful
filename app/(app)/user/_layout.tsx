@@ -17,12 +17,7 @@ export default function UserLayout() {
           headerTransparent: true,
         }}
       />
-      <Stack.Screen
-        name="[userId]"
-        options={{
-          presentation: "card",
-        }}
-      />
+      <Stack.Screen name="[userId]" />
     </Stack>
   );
 }
