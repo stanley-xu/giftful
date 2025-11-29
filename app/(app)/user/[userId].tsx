@@ -116,13 +116,12 @@ export default function UserProfileScreen() {
 
   const {
     animatedOverlayStyle,
+    animatedContentPaddingStyle,
     animatedSpacerStyle,
     animatedChevronStyle,
     toggleExpand,
     isExpanded,
     panGesture,
-    totalHeight: overlayHeight,
-    headerHeight: overlayTopPadding,
   } = useCollapsibleHeader({
     cardHeight: PROFILE_CARD_HEIGHT,
     headerHeight,
@@ -369,19 +368,12 @@ export default function UserProfileScreen() {
       {/* Profile card overlay - extends from top of screen, with padding for header */}
       <GestureDetector gesture={panGesture}>
         <Animated.View
-          style={[
-            styles.profileCardContainer,
-            { height: overlayHeight },
-            animatedOverlayStyle,
-          ]}
+          style={[styles.profileCardContainer, animatedOverlayStyle]}
           pointerEvents={isExpanded ? "auto" : "none"}
         >
-          <ProfileCard
-            profile={profile}
-            cardHeight={overlayHeight}
-            topPadding={overlayTopPadding}
-            readOnly
-          />
+          <Animated.View style={[{ flex: 1 }, animatedContentPaddingStyle]}>
+            <ProfileCard profile={profile} readOnly />
+          </Animated.View>
         </Animated.View>
       </GestureDetector>
 
@@ -415,6 +407,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PROFILE_CARD_HEIGHT,
+    backgroundColor: colours.surface,
   },
   headerButton: {
     flexDirection: "row",

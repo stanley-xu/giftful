@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import {
   interpolate,
   runOnJS,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -31,21 +32,38 @@ export function useExpandableOverlay({
   headerHeight = 0,
   initialExpanded = false,
 }: UseExpandableOverlayParams) {
-  // Total height includes header padding so card extends behind nav bar
-  const totalHeight = cardHeight + headerHeight;
   const expandProgress = useSharedValue(initialExpanded ? 1 : 0);
   const chevronRotation = useSharedValue(initialExpanded ? -180 : 0);
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
+
+  // Animate header height changes (large title collapse/expand)
+  const animatedHeaderHeight = useSharedValue(headerHeight);
+  useEffect(() => {
+    animatedHeaderHeight.value = withTiming(headerHeight, TIMING_CONFIG);
+  }, [headerHeight, animatedHeaderHeight]);
+
+  // Total height derived from animated header height
+  const animatedTotalHeight = useDerivedValue(() => {
+    return cardHeight + animatedHeaderHeight.value;
+  });
 
   const animatedOverlayStyle = useAnimatedStyle(() => {
     const translateY = interpolate(
       expandProgress.value,
       [0, 1],
-      [-totalHeight, 0]
+      [-animatedTotalHeight.value, 0]
     );
     return {
       transform: [{ translateY }],
       opacity: expandProgress.value,
+      height: animatedTotalHeight.value,
+    };
+  });
+
+  // Animated style for content padding (accounts for header height)
+  const animatedContentPaddingStyle = useAnimatedStyle(() => {
+    return {
+      paddingTop: animatedHeaderHeight.value,
     };
   });
 
@@ -83,6 +101,7 @@ export function useExpandableOverlay({
   }, [isExpanded, collapse, expand]);
 
   // Pan gesture for dragging the card up to collapse
+  // Note: Using cardHeight for drag calculation since that's the visible area
   const panGesture = useMemo(
     () =>
       Gesture.Pan()
@@ -92,7 +111,7 @@ export function useExpandableOverlay({
             // Map drag distance to progress (0 = fully expanded, 1 = collapsed)
             const dragProgress = Math.min(
               1,
-              Math.abs(event.translationY) / totalHeight
+              Math.abs(event.translationY) / cardHeight
             );
             expandProgress.value = 1 - dragProgress;
           }
@@ -108,20 +127,17 @@ export function useExpandableOverlay({
             expandProgress.value = withTiming(1, TIMING_CONFIG);
           }
         }),
-    [totalHeight, expandProgress, chevronRotation]
+    [cardHeight, expandProgress, chevronRotation]
   );
 
   return {
     animatedOverlayStyle,
+    animatedContentPaddingStyle,
     animatedSpacerStyle,
     animatedChevronStyle,
     toggleExpand,
     isExpanded,
     panGesture,
-    /** Total height of overlay (cardHeight + headerHeight) */
-    totalHeight,
-    /** Header height for top padding */
-    headerHeight,
   };
 }
 

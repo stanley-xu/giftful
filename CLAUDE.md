@@ -26,7 +26,8 @@ Check primary resources
 Supplementary resources
 
 1. **Read `docs/project.md`** to check alignment with high-level direction. I will also write some rough notes and ideas I should keep track of that you should remind me of.
-2. **Check for TODOs** in the codebase (comments, task lists, etc.)
+2. **Read `docs/claude-notes/`** to check for handoff notes you may have created. This is to regain context you may have lost (especially due to conversation compacting)
+3. **Check for TODOs** in the codebase (comments, task lists, etc.)
 
 Then **create a small plan** for me. **Present the smallest task that I could reasonably accomplish** to encourage me to start.
 

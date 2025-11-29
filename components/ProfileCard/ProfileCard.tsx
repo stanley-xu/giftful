@@ -24,7 +24,8 @@ interface ProfileCardProps {
   profile: Profile;
   readOnly?: boolean;
   onUpdate?: (field: keyof ProfileForm, value: string) => Promise<void>;
-  cardHeight: number;
+  /** Fixed height for the card. If not provided, card will flex to fill container. */
+  cardHeight?: number;
   topPadding?: number;
 }
 
@@ -81,7 +82,8 @@ export default function ProfileCard({
       style={{
         borderBottomStartRadius: borderRadius.lg,
         borderBottomEndRadius: borderRadius.lg,
-        height: cardHeight,
+        // Use fixed height if provided, otherwise flex to fill container
+        ...(cardHeight ? { height: cardHeight } : { flex: 1 }),
         paddingTop: topPadding,
         paddingBottom: 0,
         justifyContent: "space-between",

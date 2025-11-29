@@ -6,7 +6,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 import {
@@ -42,6 +45,7 @@ export default function ProfileScreen() {
     animatedChevronStyle,
     toggleExpand,
     isExpanded,
+    panGesture,
   } = useCollapsibleHeader({ cardHeight: PROFILE_CARD_HEIGHT });
 
   const navigation = useNavigation();
@@ -126,16 +130,18 @@ export default function ProfileScreen() {
         </Pressable>
       </Animated.ScrollView>
 
-      <Animated.View
-        style={[styles.profileCardContainer, animatedOverlayStyle]}
-        pointerEvents={isExpanded ? "auto" : "none"}
-      >
-        <ProfileCard
-          profile={profile}
-          cardHeight={PROFILE_CARD_HEIGHT}
-          onUpdate={handleProfileUpdate}
-        />
-      </Animated.View>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[styles.profileCardContainer, animatedOverlayStyle]}
+          pointerEvents={isExpanded ? "auto" : "none"}
+        >
+          <ProfileCard
+            profile={profile}
+            cardHeight={PROFILE_CARD_HEIGHT}
+            onUpdate={handleProfileUpdate}
+          />
+        </Animated.View>
+      </GestureDetector>
 
       <View style={[styles.bottomButtonWrapper, { bottom: bottom + 60 }]}>
         <Button
