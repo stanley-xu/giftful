@@ -1,5 +1,6 @@
 import { AuthProvider, useAuthContext } from "@/lib/auth";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import SplashScreenController from "./splash";
 
 export default function RootLayout() {
@@ -42,32 +43,35 @@ function RootNavigator() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Protected guard={guardStates.loading}>
-        <Stack.Screen name="loading" />
-      </Stack.Protected>
-      <Stack.Protected guard={guardStates.auth}>
-        <Stack.Screen name="(auth)" />
-      </Stack.Protected>
-      <Stack.Protected guard={guardStates.app}>
-        <Stack.Screen name="(app)" />
-      </Stack.Protected>
-      <Stack.Protected guard={guardStates.welcome}>
-        <Stack.Screen name="welcome" />
-      </Stack.Protected>
-      <Stack.Protected guard={guardStates.app}>
-        <Stack.Screen
-          name="add-item"
-          options={{
-            presentation: "modal",
-            headerShown: false,
-          }}
-        />
-      </Stack.Protected>
-    </Stack>
+    <>
+      <StatusBar style="auto" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Protected guard={guardStates.loading}>
+          <Stack.Screen name="loading" />
+        </Stack.Protected>
+        <Stack.Protected guard={guardStates.auth}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Protected guard={guardStates.app}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
+        <Stack.Protected guard={guardStates.welcome}>
+          <Stack.Screen name="welcome" />
+        </Stack.Protected>
+        <Stack.Protected guard={guardStates.app}>
+          <Stack.Screen
+            name="add-item"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+            }}
+          />
+        </Stack.Protected>
+      </Stack>
+    </>
   );
 }

@@ -4,11 +4,14 @@ import BottomSheet from "@/components/BottomSheet";
 import { Features } from "@/config";
 import { BottomSheetProvider } from "@/lib/hooks/useBottomSheet";
 import { colours, text } from "@/styles/tokens";
+import { StatusBar } from "expo-status-bar";
 import { DynamicColorIOS } from "react-native";
 
 export default function TabLayout() {
   return (
     <BottomSheetProvider>
+      <StatusBar style="dark" />
+
       <NativeTabs
         labelStyle={{
           color: DynamicColorIOS({
