@@ -1,125 +1,144 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AuthError } from "@supabase/supabase-js";
+import { router } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
+import { StyleSheet, View } from "react-native";
+import { z } from "zod/v4";
+
 import { Button, Input, Text } from "@/components";
 import { useAuthContext } from "@/lib/auth";
 import { generateFakeUser } from "@/lib/fake-data";
-import { spacing } from "@/styles/tokens";
-import { AuthError } from "@supabase/supabase-js";
-import { router } from "expo-router";
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-
 import { fullPageStyles } from "@/styles/styles";
+import { spacing } from "@/styles/tokens";
+
+const registerSchema = z
+  .object({
+    email: z.email("Please enter a valid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
   const { signUp, loading } = useAuthContext();
 
-  const handleRegister = async () => {
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
-      return;
-    }
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      setSubmitting(true);
-      setError(null);
-      await signUp({ email, password });
-
+      await signUp({ email: data.email, password: data.password });
       // In local: navigation happens automatically via session state change
       // In prod: email confirmation needs to be done
       router.push("/(auth)/handoff");
     } catch (e) {
       console.error(e);
-      setError((e as Error).message);
-    } finally {
-      setSubmitting(false);
+      setError("root", { message: (e as Error).message });
     }
   };
 
   const handleDevRegister = async () => {
     const fakeUser = generateFakeUser();
 
+    // Set form values for visibility
+    setValue("email", fakeUser.email);
+    setValue("password", fakeUser.password);
+    setValue("confirmPassword", fakeUser.password);
+
     try {
-      setError(null);
-      setSubmitting(true);
-
-      // Set form values for visibility
-      setEmail(fakeUser.email);
-      setPassword(fakeUser.password);
-      setConfirmPassword(fakeUser.password);
-
       await signUp({
         email: fakeUser.email,
         password: fakeUser.password,
       });
-
       // Navigation happens automatically via session state change
     } catch (e) {
       const authError = e as AuthError;
       console.error(authError);
-      setError(authError.message);
-    } finally {
-      setSubmitting(false);
+      setError("root", { message: authError.message });
     }
   };
+
+  const isLoading = isSubmitting || loading;
 
   return (
     <View style={styles.container}>
       <View style={styles.form}>
         <Text style={styles.title}>Create account</Text>
 
-        <Input
-          label="Email"
-          placeholder="giver@giftful.io"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Email"
+              placeholder="giver@giftful.io"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              error={errors.email?.message}
+            />
+          )}
         />
 
-        <Input
-          label="Password"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Password"
+              placeholder="Enter your password"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              secureTextEntry
+              error={errors.password?.message}
+            />
+          )}
         />
 
-        <Input
-          label="Confirm Password"
-          placeholder="Re-enter your password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
+        <Controller
+          control={control}
+          name="confirmPassword"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Confirm Password"
+              placeholder="Re-enter your password"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              secureTextEntry
+              error={errors.confirmPassword?.message}
+            />
+          )}
         />
 
-        <Button onPress={handleRegister} loading={submitting || loading}>
+        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
           <Text variant="semibold">Register</Text>
         </Button>
 
-        {error && <Text variant="error">{error}</Text>}
+        {errors.root && <Text variant="error">{errors.root.message}</Text>}
 
         {__DEV__ && (
-          <Button
-            loading={submitting || loading}
-            onPress={handleDevRegister}
-            variant="dev"
-          >
+          <Button loading={isLoading} onPress={handleDevRegister} variant="dev">
             <Text variant="semibold">Auto-generate user</Text>
           </Button>
         )}
