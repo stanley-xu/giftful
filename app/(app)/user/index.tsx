@@ -98,22 +98,21 @@ export default function FollowingScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={following}
-        renderItem={({ item }) => <FollowingItem profile={item} />}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-      />
-    </View>
+    <FlatList
+      data={following}
+      renderItem={({ item }) => <FollowingItem profile={item} />}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.list}
+      contentInsetAdjustmentBehavior="automatic"
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colours.background,
-  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: colours.background,
+  // },
   centerContainer: {
     flex: 1,
     justifyContent: "center",

@@ -36,6 +36,97 @@ const testUsers = [
     name: "Alice",
     bio: "Hi there, I'm Alice ^_^",
   },
+  {
+    id: "00000000-0000-0000-0000-000000000003",
+    email: "bob@example.com",
+    password: "bob@example.com",
+    name: "Bob",
+    bio: "Just a regular Bob",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000004",
+    email: "charlie@example.com",
+    password: "charlie@example.com",
+    name: "Charlie",
+    bio: "Coffee enthusiast ☕",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000005",
+    email: "diana@example.com",
+    password: "diana@example.com",
+    name: "Diana",
+    bio: "Book lover and tea addict",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000006",
+    email: "ethan@example.com",
+    password: "ethan@example.com",
+    name: "Ethan",
+    bio: "Gaming is life",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000007",
+    email: "fiona@example.com",
+    password: "fiona@example.com",
+    name: "Fiona",
+    bio: "Photography & travel",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000008",
+    email: "george@example.com",
+    password: "george@example.com",
+    name: "George",
+    bio: "Foodie extraordinaire",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000009",
+    email: "hannah@example.com",
+    password: "hannah@example.com",
+    name: "Hannah",
+    bio: "Yoga and mindfulness",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000010",
+    email: "ivan@example.com",
+    password: "ivan@example.com",
+    name: "Ivan",
+    bio: "Tech geek",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000011",
+    email: "julia@example.com",
+    password: "julia@example.com",
+    name: "Julia",
+    bio: "Artist & designer",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000012",
+    email: "kevin@example.com",
+    password: "kevin@example.com",
+    name: "Kevin",
+    bio: "Music producer",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000013",
+    email: "laura@example.com",
+    password: "laura@example.com",
+    name: "Laura",
+    bio: "Plant mom",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000014",
+    email: "mike@example.com",
+    password: "mike@example.com",
+    name: "Mike",
+    bio: "Sports fanatic",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000015",
+    email: "nina@example.com",
+    password: "nina@example.com",
+    name: "Nina",
+    bio: "Fashion lover",
+  },
 ];
 
 async function seed() {
@@ -118,17 +209,24 @@ async function seed() {
     console.log("");
   }
 
-  // Create follow relationships
+  // Create follow relationships - Dev follows everyone else
   console.log("Creating follow relationships...");
-  const { error: followError } = await supabase.from("follows").insert({
-    follower_id: "00000000-0000-0000-0000-000000000001", // Dev
-    following_id: "00000000-0000-0000-0000-000000000002", // Alice
-  });
+  const devId = "00000000-0000-0000-0000-000000000001";
+  const followees = testUsers.filter((u) => u.id !== devId);
+
+  const followInserts = followees.map((followee) => ({
+    follower_id: devId,
+    following_id: followee.id,
+  }));
+
+  const { error: followError } = await supabase
+    .from("follows")
+    .insert(followInserts);
 
   if (followError) {
-    console.error(`  ❌ Error creating follow: ${followError.message}`);
+    console.error(`  ❌ Error creating follows: ${followError.message}`);
   } else {
-    console.log(`  ✅ Dev now follows Alice`);
+    console.log(`  ✅ Dev now follows ${followees.length} users`);
   }
   console.log("");
 

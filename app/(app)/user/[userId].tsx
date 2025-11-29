@@ -6,9 +6,11 @@ import {
   Keyboard,
   Pressable,
   ScrollView,
+  StyleProp,
   StyleSheet,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from "react-native";
 import {
   GestureDetector,
@@ -43,16 +45,19 @@ function FollowButton({
   isFollowing,
   isLoading,
   onPress,
+  style,
 }: {
   isFollowing: boolean;
   isLoading: boolean;
   onPress: () => void;
+  style?: StyleProp<ViewStyle>;
 }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isLoading}
-      style={styles.followButton}
+      // fixing width to prevent layout shift when isFollowing status finishes loading
+      style={[style, { width: 100 }]}
     >
       {isLoading ? (
         <ActivityIndicator size="small" color={text.black} />
@@ -144,33 +149,35 @@ export default function UserProfileScreen() {
   useEffect(() => {
     const isOwnProfile = session.user.id === userId;
 
+    const followButton = !isOwnProfile ? (
+      <FollowButton
+        isFollowing={isFollowing}
+        isLoading={isFollowLoading || isFollowStatusLoading}
+        onPress={handleFollowToggle}
+        style={[styles.headerButton, { width: 100 }]}
+      />
+    ) : null;
+
+    const profileButton = (
+      <TouchableOpacity onPress={toggleExpand} style={styles.headerButton}>
+        <Animated.View style={animatedChevronStyle}>
+          <ChevronUp size={24} color={text.black} />
+        </Animated.View>
+      </TouchableOpacity>
+    );
+
     navigation.setOptions({
       headerTransparent: false,
       headerStyle: {
         backgroundColor: colours.surface,
       },
-      headerTitle: () => (
-        <TouchableOpacity
-          onPress={toggleExpand}
-          style={[styles.collapsedHeaderContent]}
-        >
-          <Text variant="semibold" fontSize="lg">
-            {firstName}
-          </Text>
-          <Animated.View style={animatedChevronStyle}>
-            <ChevronUp size={16} color={text.black} />
-          </Animated.View>
-        </TouchableOpacity>
+      title: firstName,
+      headerRight: () => (
+        <View style={{ flexDirection: "row", gap: 4 }}>
+          {followButton}
+          {profileButton}
+        </View>
       ),
-      headerRight: !isOwnProfile
-        ? () => (
-            <FollowButton
-              isFollowing={isFollowing}
-              isLoading={isFollowLoading || isFollowStatusLoading}
-              onPress={handleFollowToggle}
-            />
-          )
-        : undefined,
     });
   }, [
     navigation,
@@ -398,15 +405,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: PROFILE_CARD_HEIGHT,
   },
-  collapsedHeaderContent: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: spacing.md,
-    width: 150,
-    gap: 0,
-  },
-  followButton: {
+  headerButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,

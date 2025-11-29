@@ -5,18 +5,21 @@ export default function UserLayout() {
     <Stack
       screenOptions={{
         headerBackButtonDisplayMode: "minimal",
+        headerShadowVisible: false,
+        headerShown: true,
+        headerLargeTitle: true,
       }}
     >
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: "Following",
+          headerTransparent: true,
         }}
       />
       <Stack.Screen
         name="[userId]"
         options={{
-          headerShown: true,
           presentation: "card",
         }}
       />
