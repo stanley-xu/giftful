@@ -1,6 +1,6 @@
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 
-import BottomSheet from "@/components/BottomSheet";
+import { ProfileSheet } from "@/components/ProfileSheet";
 import { Features } from "@/config";
 import { BottomSheetProvider } from "@/lib/hooks/useBottomSheet";
 import { colours, text } from "@/styles/tokens";
@@ -45,7 +45,7 @@ export default function TabLayout() {
           <Icon sf="book" />
         </NativeTabs.Trigger>
       </NativeTabs>
-      <BottomSheet />
+      <ProfileSheet />
     </BottomSheetProvider>
   );
 }

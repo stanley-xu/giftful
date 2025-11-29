@@ -1,5 +1,6 @@
 // UI Components
-export { default as BottomSheet } from "./BottomSheet";
+export { BottomSheet } from "./BottomSheet";
+export { ProfileSheet } from "./ProfileSheet";
 export { Button, ButtonProps, Logout } from "./Button";
 export { Card } from "./Card";
 export { Container } from "./Container";
