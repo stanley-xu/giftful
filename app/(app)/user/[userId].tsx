@@ -1,3 +1,4 @@
+import { useHeaderHeight } from "@react-navigation/elements";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { ChevronUp, UserCheck, UserPlus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -10,18 +11,25 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 import { Loading, Text } from "@/components";
+import { ProfileCard } from "@/components/ProfileCard";
+import { WishlistItemEditModal } from "@/components/WishlistItemEditModal";
+import { WishlistSection } from "@/components/WishlistSection";
 import { Features } from "@/config";
 import {
-  follows,
   profiles,
   shareTokens,
   wishlistItems as wishlistItemsApi,
   wishlists as wishlistsApi,
 } from "@/lib/api";
 import { useAuthContext } from "@/lib/auth";
+import { useFollowing } from "@/lib/contexts/FollowingContext";
 import { useCollapsibleHeader } from "@/lib/hooks/useCollapsibleHeader";
 import type { Profile, Wishlist, WishlistItem } from "@/lib/schemas";
 import { assert } from "@/lib/utils";
@@ -83,6 +91,7 @@ export default function UserProfileScreen() {
     isFollowing?: string;
   }>();
   const navigation = useNavigation();
+  const headerHeight = useHeaderHeight();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
@@ -111,35 +120,37 @@ export default function UserProfileScreen() {
     animatedChevronStyle,
     toggleExpand,
     isExpanded,
+    panGesture,
+    totalHeight: overlayHeight,
+    headerHeight: overlayTopPadding,
   } = useCollapsibleHeader({
     cardHeight: PROFILE_CARD_HEIGHT,
+    headerHeight,
     initialExpanded: isSharedView,
   });
+
+  const { follow, unfollow, isFollowingUser } = useFollowing();
 
   const handleFollowToggle = useCallback(async () => {
     if (isFollowLoading) return;
 
-    // Optimistic update
-    const previousState = isFollowing;
-    setIsFollowing(!isFollowing);
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
     setIsFollowLoading(true);
 
     try {
-      if (previousState) {
-        const { error } = await follows.delete(userId);
-        if (error) throw error;
-      } else {
-        const { error } = await follows.create(userId);
-        if (error) throw error;
+      if (wasFollowing) {
+        await unfollow(userId);
+      } else if (profile) {
+        await follow(profile);
       }
     } catch (err) {
       console.error("Error toggling follow:", err);
-      // Revert on error
-      setIsFollowing(previousState);
+      setIsFollowing(wasFollowing);
     } finally {
       setIsFollowLoading(false);
     }
-  }, [isFollowLoading, isFollowing, userId]);
+  }, [isFollowLoading, isFollowing, userId, follow, unfollow, profile]);
 
   useEffect(() => {
     const isOwnProfile = session.user.id === userId;
@@ -228,10 +239,7 @@ export default function UserProfileScreen() {
               userHasAccess = true;
             } else if (wishlist.visibility === "follower") {
               // Follower - only followers can see
-              const { data: isFollowingUser } = await follows.isFollowing(
-                userId
-              );
-              userHasAccess = Boolean(isFollowingUser);
+              userHasAccess = isFollowingUser(userId);
             } else {
               // Private - only owner can see (already handled above)
               userHasAccess = false;
@@ -273,10 +281,9 @@ export default function UserProfileScreen() {
           setWishlistItems(itemsData || []);
         }
 
-        // Check if currently following this user (only if not own profile and not already known from params)
+        // Set follow status from context (only if not own profile and not already known from params)
         if (userHasAccess && currentUser.id !== userId && !isFollowingParam) {
-          const { data: followingStatus } = await follows.isFollowing(userId);
-          setIsFollowing(followingStatus ?? false);
+          setIsFollowing(isFollowingUser(userId));
           setIsFollowStatusLoading(false);
         }
 
@@ -289,7 +296,7 @@ export default function UserProfileScreen() {
     };
 
     checkAccessAndFetchData();
-  }, [userId, shareToken, isFollowingParam]);
+  }, [userId, shareToken, isFollowingParam, isFollowingUser]);
 
   const refetchWishlistItems = useCallback(async (wishlistId: string) => {
     try {
@@ -339,39 +346,45 @@ export default function UserProfileScreen() {
   }
 
   return (
-    // <GestureHandlerRootView style={{ flex: 1 }}>
-    // <>
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      style={{ backgroundColor: colours.background }}
-      contentContainerStyle={{ paddingBottom: 50 }}
-    >
-      {Array.from({ length: 30 }, (_, i) => (
-        <View
-          key={i}
-          style={{
-            padding: 20,
-            borderBottomWidth: 1,
-            borderBottomColor: colours.border,
-          }}
-        >
-          <Text>Item {i + 1}</Text>
-        </View>
-      ))}
-    </ScrollView>
-    /* 
-      <Animated.View
-        style={[styles.profileCardContainer, animatedOverlayStyle]}
-        pointerEvents={isExpanded ? "auto" : "none"}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        style={{ backgroundColor: colours.background }}
+        contentContainerStyle={{ paddingBottom: 50 }}
       >
-        <ProfileCard
-          profile={profile}
-          cardHeight={PROFILE_CARD_HEIGHT}
+        {/* Spacer that animates with the overlay to push content down */}
+        <Animated.View style={animatedSpacerStyle} />
+
+        <WishlistSection
+          wishlists={wishlists}
+          wishlistItems={wishlistItems}
+          error={error}
+          onItemPress={handleItemPress}
+          refetch={refetchWishlistItems}
           readOnly
         />
-      </Animated.View> */
-    /* 
+      </ScrollView>
+
+      {/* Profile card overlay - extends from top of screen, with padding for header */}
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[
+            styles.profileCardContainer,
+            { height: overlayHeight },
+            animatedOverlayStyle,
+          ]}
+          pointerEvents={isExpanded ? "auto" : "none"}
+        >
+          <ProfileCard
+            profile={profile}
+            cardHeight={overlayHeight}
+            topPadding={overlayTopPadding}
+            readOnly
+          />
+        </Animated.View>
+      </GestureDetector>
+
       <WishlistItemEditModal
         visible={isViewModalVisible}
         item={viewingItem}
@@ -380,9 +393,8 @@ export default function UserProfileScreen() {
           setViewingItem(null);
         }}
         readOnly
-      /> */
-    // {/* </> */}
-    // </GestureHandlerRootView>
+      />
+    </GestureHandlerRootView>
   );
 }
 

@@ -1,10 +1,10 @@
 import { Link } from "expo-router";
-import { useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { Loading, Text } from "@/components";
-import { follows } from "@/lib/api";
 import { useAuthContext } from "@/lib/auth";
+import { useFollowing } from "@/lib/contexts/FollowingContext";
 import type { Profile } from "@/lib/schemas";
 import { assert } from "@/lib/utils";
 import { routes } from "@/lib/utils/routes";
@@ -48,29 +48,16 @@ export default function FollowingScreen() {
   const { session } = useAuthContext();
   assert(session, "FollowingScreen should be authenticated");
 
-  const [following, setFollowing] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { following, isLoading, error, fetchFollowing } = useFollowing();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchFollowing();
-  }, []);
-
-  const fetchFollowing = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await follows.getFollowing();
-      if (error) throw error;
-      setFollowing(data || []);
-    } catch (err) {
-      console.error("Error fetching following:", err);
-      setError(err as Error);
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchFollowing();
+    setIsRefreshing(false);
   };
 
-  if (loading) {
+  if (isLoading && !isRefreshing) {
     return (
       <View style={styles.centerContainer}>
         <Loading />
@@ -110,6 +97,9 @@ export default function FollowingScreen() {
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.list}
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+      }
     />
   );
 }

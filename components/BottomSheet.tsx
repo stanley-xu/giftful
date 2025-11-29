@@ -148,7 +148,10 @@ export default function BottomSheet() {
                 },
               ]}
             >
-              <Pressable onPress={(e) => e.stopPropagation()} style={{ flex: 1 }}>
+              <Pressable
+                onPress={(e) => e.stopPropagation()}
+                style={{ flex: 1 }}
+              >
                 {/* Handle/Grip indicator */}
                 <View style={styles.handleContainer}>
                   <View style={styles.handle} />
@@ -207,10 +210,8 @@ export default function BottomSheet() {
                           "Paste the full share URL",
                           (input: string) => {
                             // Parse the share link and navigate
-                            // Expected format: https://giftful.io/profile/{userId}?list={wishlistId}&share={token}
-                            const index = input.indexOf("profile");
-                            const link = input.slice(index);
-                            console.log({ link });
+                            // Expected format: see routes.ts
+                            const link = input.slice(input.indexOf("user"));
 
                             if (link && profile) {
                               closeBottomSheet();

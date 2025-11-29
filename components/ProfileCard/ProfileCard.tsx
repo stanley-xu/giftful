@@ -25,6 +25,7 @@ interface ProfileCardProps {
   readOnly?: boolean;
   onUpdate?: (field: keyof ProfileForm, value: string) => Promise<void>;
   cardHeight: number;
+  topPadding?: number;
 }
 
 export default function ProfileCard({
@@ -32,6 +33,7 @@ export default function ProfileCard({
   readOnly = false,
   onUpdate,
   cardHeight,
+  topPadding = 0,
 }: ProfileCardProps) {
   const [editingField, setEditingField] = useState<keyof ProfileForm | null>(
     null
@@ -80,7 +82,7 @@ export default function ProfileCard({
         borderBottomStartRadius: borderRadius.lg,
         borderBottomEndRadius: borderRadius.lg,
         height: cardHeight,
-        paddingTop: 0,
+        paddingTop: topPadding,
         paddingBottom: 0,
         justifyContent: "space-between",
       }}
