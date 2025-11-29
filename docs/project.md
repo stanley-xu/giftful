@@ -92,9 +92,9 @@ You've got 30 productive hours ahead of you. Make them count. 💪
 
 Unsorted.
 
-- Assets
-  - Icon
-  - Splash
+- Assets ✅
+  - Icon ✅
+  - Splash ✅
 - Mark as purchased
   - Only available for user profile route
 - Experiment: Support large title
