@@ -3,8 +3,11 @@ export const palette = {
   primary2: "hsl(148, 13%, 51%)",
   primary3: "hsl(162, 16%, 47%)",
   secondary: "hsl(9, 51%, 59%)",
+  secondaryDark: "hsl(9, 51%, 43%)",
   offwhite: "hsl(45, 55%, 91%)",
   white: "hsl(0, 0%, 97%)",
+  black: "hsl(0, 0%, 15%)",
+  gray: "hsla(135, 15%, 15%, 0.7)",
 } as const;
 
 export const colours = {
@@ -15,13 +18,14 @@ export const colours = {
   surfaceDark: palette.primary3,
   accent: palette.primary3,
   error: palette.secondary,
-  text: "hsl(135, 15%, 15%)",
+  text: palette.black,
   border: "hsl(0, 0%, 88%)",
 } as const;
 
 export const text = {
-  black: "hsl(135, 15%, 15%)",
+  black: palette.black,
   white: palette.white,
+  gray: palette.gray,
 } as const;
 
 export const typography = {

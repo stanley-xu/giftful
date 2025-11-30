@@ -7,7 +7,7 @@ export const fullPageStyles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing["3xl"],
     paddingHorizontal: 16,
-    backgroundColor: colours.surface,
+    backgroundColor: colours.background,
   },
   title: {
     fontSize: typography.fontSize["3xl"],
