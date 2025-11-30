@@ -23,6 +23,8 @@ const AuthContext = createContext<{
   session?: Session | null;
   profile?: Profile | null;
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   // Need to expose this because the app can create profiles outside of the provider here
   setProfile: (profile: Profile | null) => void;
 }>({
@@ -32,6 +34,8 @@ const AuthContext = createContext<{
   session: null,
   profile: null,
   loading: false,
+  error: null,
+  clearError: () => null,
   setProfile: () => null,
 });
 
@@ -68,6 +72,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   const getSession = useCallback(async () => {
     const { data, error } = await auth.getSession();
@@ -138,17 +145,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const params = new URLSearchParams(url.slice(hashIndex + 1));
       const access_token = params.get("access_token");
       const refresh_token = params.get("refresh_token");
+      const error = params.get("error");
+      const errorDescription = params.get("error_description");
+
+      if (error) {
+        // Best attempt at humanizing the Supabase error
+        const errorMessage = `${error}: ${errorDescription}`;
+        setError(errorMessage);
+        return;
+      }
 
       // Not an auth callback URL
       if (!access_token || !refresh_token) return;
 
       console.debug("[Deep Link] Extracting session from URL");
-      const { error } = await supabase.auth.setSession({
+      const { error: setSessionError } = await supabase.auth.setSession({
         access_token,
         refresh_token,
       });
-      if (error) {
-        console.error("[Deep Link] Failed to set session:", error.message);
+
+      if (setSessionError) {
+        console.error(
+          "[Deep Link] Failed to set session:",
+          setSessionError.message
+        );
       }
     };
 
@@ -231,9 +251,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       session,
       profile,
       loading,
+      error,
+      clearError,
       setProfile,
     }),
-    [signIn, signOut, signUp, session, profile, loading]
+    [signIn, signOut, signUp, session, profile, loading, error, clearError]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

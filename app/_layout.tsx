@@ -1,6 +1,10 @@
+import { BottomSheet, Text } from "@/components";
 import { AuthProvider, useAuthContext } from "@/lib/auth";
+import { colours, spacing } from "@/styles/tokens";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { MessageCircleWarning } from "lucide-react-native";
+import { View } from "react-native";
 import SplashScreenController from "./splash";
 
 export default function RootLayout() {
@@ -17,7 +21,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { session, profile, loading: profileLoading } = useAuthContext();
+  const { session, profile, loading: profileLoading, error, clearError } = useAuthContext();
 
   const guardStates = {
     loading: profileLoading,
@@ -79,6 +83,25 @@ function RootNavigator() {
           />
         </Stack.Protected>
       </Stack>
+      <BottomSheet
+        visible={Boolean(error)}
+        onClose={clearError}
+        containerStyle={{
+          backgroundColor: colours.surface,
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            gap: spacing.md,
+            paddingTop: spacing.xl,
+          }}
+        >
+          <MessageCircleWarning size={96} color={colours.error} />
+          <Text variant="error">{error}</Text>
+        </View>
+      </BottomSheet>
     </>
   );
 }
