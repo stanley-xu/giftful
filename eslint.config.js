@@ -1,16 +1,19 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
 // https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
-const expoConfig = require('eslint-config-expo/flat');
+import { defineConfig } from "eslint/config";
+import expoConfig from "eslint-config-expo/flat.js";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 
-module.exports = defineConfig([
+export default defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*'],
+    ignores: ["dist/*"],
+    plugins: {
+      "react-hooks": reactHooksPlugin,
+    },
     rules: {
-      'import/no-unresolved': 'off', // TypeScript handles path resolution
+      "import/no-unresolved": "off", // TypeScript handles path resolution
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
 ]);
