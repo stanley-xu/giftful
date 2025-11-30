@@ -76,14 +76,14 @@ export function BottomSheet({
             >
               <Pressable
                 onPress={(e) => e.stopPropagation()}
-                style={{ flex: 1 }}
+                style={styles.content}
               >
                 {showHandle && (
                   <View style={styles.handleContainer}>
                     <View style={styles.handle} />
                   </View>
                 )}
-                {children}
+                <View style={styles.childrenContainer}>{children}</View>
               </Pressable>
             </Animated.View>
           </GestureDetector>
@@ -100,10 +100,14 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: colours.background,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+  },
+  content: {
+    flex: 1,
+  },
+  childrenContainer: {
+    flex: 1,
   },
   handleContainer: {
     alignItems: "center",

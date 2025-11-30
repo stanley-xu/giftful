@@ -29,6 +29,8 @@ export function useDragToDismiss(isOpen: boolean, onDismiss: () => void) {
   };
 
   const gesture = Gesture.Pan()
+    // Only activate when dragging down (positive Y), let ScrollView handle up scrolling
+    .activeOffsetY(10)
     .onStart(() => {
       context.value = { y: translateY.value };
     })
