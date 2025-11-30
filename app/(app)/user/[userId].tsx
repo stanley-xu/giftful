@@ -62,7 +62,7 @@ function FollowButton({
       ) : (
         <UserPlus size={20} color={text.black} />
       )}
-      <Text variant="semibold" fontSize="sm">
+      <Text variant="semibold" size="sm">
         {isFollowing ? "Unfollow" : "Follow"}
       </Text>
     </TouchableOpacity>
@@ -316,7 +316,7 @@ export default function UserProfileScreen() {
   if (!hasAccess) {
     return (
       <View style={styles.centerContainer}>
-        <Text fontSize="lg" style={{ marginBottom: spacing.md }}>
+        <Text size="lg" style={{ marginBottom: spacing.md }}>
           This wishlist is private
         </Text>
         <Text style={{ color: colours.text, opacity: 0.6 }}>

@@ -45,7 +45,7 @@ export function Input({
           error && styles.error,
           style,
         ]}
-        placeholderTextColor={text.black}
+        placeholderTextColor={text.gray}
         onFocus={(e) => {
           setIsFocused(true);
           props.onFocus?.(e);

@@ -1,6 +1,12 @@
 import { Link } from "expo-router";
 import { useState } from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
 
 import { Loading, Text } from "@/components";
 import { useAuthContext } from "@/lib/auth";
@@ -27,14 +33,14 @@ function FollowingItem({ profile }: { profile: Profile }) {
     >
       <Pressable style={styles.item}>
         <View style={styles.avatar}>
-          <Text variant="semibold" fontSize="lg" style={{ color: text.white }}>
+          <Text variant="semibold" size="lg" style={{ color: text.white }}>
             {initials}
           </Text>
         </View>
         <View style={styles.info}>
           <Text variant="semibold">{profile.name}</Text>
           {profile.bio && (
-            <Text fontSize="sm" style={{ color: text.black, opacity: 0.6 }}>
+            <Text size="sm" style={{ color: text.black, opacity: 0.6 }}>
               {profile.bio}
             </Text>
           )}
@@ -76,11 +82,7 @@ export default function FollowingScreen() {
   if (following.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text
-          fontSize="lg"
-          variant="semibold"
-          style={{ marginBottom: spacing.sm }}
-        >
+        <Text size="lg" variant="semibold" style={{ marginBottom: spacing.sm }}>
           No one yet
         </Text>
         <Text style={{ color: text.black, opacity: 0.6, textAlign: "center" }}>

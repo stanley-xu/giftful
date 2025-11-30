@@ -38,7 +38,7 @@ function SheetItem({
       ]}
     >
       {icon}
-      <Text variant={variant} fontSize="sm">
+      <Text variant={variant} size="sm">
         {label}
       </Text>
     </Button>
