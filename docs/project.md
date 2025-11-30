@@ -65,29 +65,6 @@ You've got 30 productive hours ahead of you. Make them count. 💪
 
 ---
 
-## TestFlight Deployment Checklist
-
-**Prerequisites:**
-
-- [x] Apple Developer account active ($99/year, 24-48hr activation)
-- [x] Bundle ID decided: `io.giftful`
-
-**Setup (one-time):**
-
-- [ ] Install EAS CLI: `npm install -g eas-cli`
-- [ ] Configure EAS: `eas build:configure` (creates eas.json)
-- [ ] Login to Expo: `eas login`
-- [ ] Configure iOS bundle ID in app.json
-
-**Build & Deploy:**
-
-- [ ] Create iOS production build: `eas build --platform ios --profile production`
-- [ ] Submit to TestFlight: `eas submit --platform ios`
-- [ ] Add testers in App Store Connect
-- [ ] Send invites via email or public link
-
----
-
 ## Ideas
 
 Unsorted.

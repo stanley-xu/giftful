@@ -6,12 +6,15 @@
 import { config } from "dotenv";
 import { ConfigContext, ExpoConfig } from "expo/config";
 
-const envFile = process.env.APP_VARIANT || "local";
-config({
-  path: `.env.${envFile}`,
-  override: true,
-  quiet: true,
-});
+const envFile = process.env.APP_VARIANT;
+
+if (envFile) {
+  config({
+    path: `.env.${envFile}`,
+    override: true,
+    quiet: true,
+  });
+}
 
 /**
  * APP_VARIANT variable will be set either:
