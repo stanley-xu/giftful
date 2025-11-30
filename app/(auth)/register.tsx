@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AuthError } from "@supabase/supabase-js";
 import { Mail } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -51,8 +50,10 @@ export default function RegisterScreen() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
+      console.log("before");
       await signUp({ email: data.email, password: data.password });
       registeredEmailRef.current = data.email;
+      console.log(data.email);
       setResendSuccess(false);
       setShowCheckEmail(true);
     } catch (e) {
@@ -62,6 +63,7 @@ export default function RegisterScreen() {
   };
 
   const handleResendEmail = async () => {
+    console.log(registeredEmailRef.current);
     if (!registeredEmailRef.current) return;
 
     setIsResending(true);
@@ -93,6 +95,8 @@ export default function RegisterScreen() {
         email: fakeUser.email,
         password: fakeUser.password,
       });
+      registeredEmailRef.current = fakeUser.email;
+      setResendSuccess(false);
       setShowCheckEmail(true);
     } catch (e) {
       const authError = e as AuthError;
@@ -181,13 +185,9 @@ export default function RegisterScreen() {
             your signup.
           </Text>
           {resendSuccess ? (
-            <Text style={styles.resendSuccess}>Email sent!</Text>
+            <Text>Email sent!</Text>
           ) : (
-            <Button
-              onPress={handleResendEmail}
-              loading={isResending}
-              variant="secondary"
-            >
+            <Button onPress={handleResendEmail} loading={isResending}>
               <Text variant="semibold">Resend verification email</Text>
             </Button>
           )}
@@ -221,10 +221,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   sheetDescription: {
-    textAlign: "center",
-  },
-  resendSuccess: {
-    color: colours.surfaceDark,
     textAlign: "center",
   },
 });
