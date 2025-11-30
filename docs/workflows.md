@@ -7,18 +7,27 @@ See the guide [here](https://docs.expo.dev/workflow/overview/)
 
 # Distributing the app
 
-## Using EAS for submission
+Submit the app binary (which you previously built) to the App Store.
+
+**Note:** submitting an app to the App Store is a multi-step process, and this is just the beginning. Some parts (i.e. TestFlight) can be automated, but App Store reviews are always manual
+
+TL;DR
 
 ```sh
+eas build --platform ios --profile production # first, trigger build if you haven't
 eas submit --platform ios # prompts you to select a production build on EAS
 ```
 
-Checklist
+### TestFlight
 
-1. Create iOS production build: `eas build --platform ios --profile production`
-2. Submit to TestFlight: `eas submit --platform ios`
-3. Add testers in App Store Connect
-4. Send invites via email or public link
+To distribute with TestFlight, either
+
+- Use the App Store Connect website > Apps > setup Groups and ensure build is assigned to the group, OR
+- use `eas build --platform ios --auto-submit` (this does not submit to App Store for review)
+
+### App Store
+
+Must manually promote a TestFlight build to App Store review.
 
 # Development loop
 
