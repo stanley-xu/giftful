@@ -615,6 +615,54 @@ export const wishlistItems = {
   },
 
   /**
+   * Add many items to wishlist
+   */
+  async createMany(
+    wishlistId: string,
+    items: CreateWishlistItem[]
+  ): Promise<DbResult<WishlistItem[]>> {
+    try {
+      if (items.length === 0) {
+        return { data: [], error: null };
+      }
+
+      // Get max order for this wishlist
+      const { data: maxOrderResult } = await supabase
+        .from("wishlist_items")
+        .select("order")
+        .eq("wishlist_id", wishlistId)
+        .order("order", { ascending: false })
+        .limit(1)
+        .single();
+
+      const startOrder = (maxOrderResult?.order ?? 0) + 1;
+
+      const insertData = items.map((item, index) => ({
+        wishlist_id: wishlistId,
+        name: item.name,
+        url: item.url || null,
+        description: item.description || null,
+        order: startOrder + index,
+      }));
+
+      const { data: createdItems, error } = await supabase
+        .from("wishlist_items")
+        .insert(insertData)
+        .select();
+
+      if (error) throw error;
+
+      return {
+        data: createdItems.map((item) => WishlistItemSchema.parse(item)),
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error creating wishlist items:", error);
+      return { data: null, error: error as Error };
+    }
+  },
+
+  /**
    * Update a wishlist item
    */
   async update(
@@ -753,15 +801,21 @@ export const shareTokens = {
    * Validate a share token for a given wishlist ID
    * Returns true if the token is valid and active for that wishlist
    */
-  async validateFor(wishlistId: string, token: string): Promise<DbResult<boolean>> {
+  async validateFor(
+    wishlistId: string,
+    token: string
+  ): Promise<DbResult<boolean>> {
     try {
       // Validate input types first
-      const validationResult = ShareTokenValidationSchema.safeParse({ wishlistId, token });
+      const validationResult = ShareTokenValidationSchema.safeParse({
+        wishlistId,
+        token,
+      });
 
       if (!validationResult.success) {
         return {
           data: false,
-          error: new Error(`Invalid input: ${validationResult.error.message}`)
+          error: new Error(`Invalid input: ${validationResult.error.message}`),
         };
       }
 
@@ -896,10 +950,11 @@ export const follows = {
 
       if (error) throw error;
 
-      const profiles = data
-        ?.map((row: any) => row.profiles)
-        .filter((p: any) => p !== null)
-        .map((p: any) => ProfileSchema.parse(p)) ?? [];
+      const profiles =
+        data
+          ?.map((row: any) => row.profiles)
+          .filter((p: any) => p !== null)
+          .map((p: any) => ProfileSchema.parse(p)) ?? [];
 
       return { data: profiles, error: null };
     } catch (error) {
@@ -924,10 +979,11 @@ export const follows = {
 
       if (error) throw error;
 
-      const profiles = data
-        ?.map((row: any) => row.profiles)
-        .filter((p: any) => p !== null)
-        .map((p: any) => ProfileSchema.parse(p)) ?? [];
+      const profiles =
+        data
+          ?.map((row: any) => row.profiles)
+          .filter((p: any) => p !== null)
+          .map((p: any) => ProfileSchema.parse(p)) ?? [];
 
       return { data: profiles, error: null };
     } catch (error) {
