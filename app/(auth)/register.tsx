@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthError } from "@supabase/supabase-js";
 import { Mail } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { z } from "zod/v4";
 
 import { Button, Input, Text } from "@/components";
 import { BottomSheet } from "@/components/BottomSheet";
+import { auth } from "@/lib/api";
 import { useAuthContext } from "@/lib/auth";
 import { generateFakeUser } from "@/lib/fake-data";
 import { fullPageStyles } from "@/styles/styles";
@@ -29,6 +30,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function RegisterScreen() {
   const { signUp, loading } = useAuthContext();
   const [showCheckEmail, setShowCheckEmail] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const registeredEmailRef = useRef<string | null>(null);
 
   const {
     control,
@@ -48,10 +52,31 @@ export default function RegisterScreen() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await signUp({ email: data.email, password: data.password });
+      registeredEmailRef.current = data.email;
+      setResendSuccess(false);
       setShowCheckEmail(true);
     } catch (e) {
       console.error(e);
       setError("root", { message: (e as Error).message });
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!registeredEmailRef.current) return;
+
+    setIsResending(true);
+    setResendSuccess(false);
+
+    try {
+      const { error } = await auth.resendVerificationEmail(
+        registeredEmailRef.current
+      );
+      if (error) throw error;
+      setResendSuccess(true);
+    } catch (e) {
+      console.error("Failed to resend verification email:", e);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -145,7 +170,7 @@ export default function RegisterScreen() {
       <BottomSheet
         visible={showCheckEmail}
         onClose={() => setShowCheckEmail(false)}
-        heightPercentage={0.35}
+        heightPercentage={0.45}
         containerStyle={{ backgroundColor: colours.surface }}
       >
         <View style={styles.sheetContent}>
@@ -155,6 +180,17 @@ export default function RegisterScreen() {
             We sent a verification link to your email. Use the link to complete
             your signup.
           </Text>
+          {resendSuccess ? (
+            <Text style={styles.resendSuccess}>Email sent!</Text>
+          ) : (
+            <Button
+              onPress={handleResendEmail}
+              loading={isResending}
+              variant="secondary"
+            >
+              <Text variant="semibold">Resend verification email</Text>
+            </Button>
+          )}
         </View>
       </BottomSheet>
     </View>
@@ -185,6 +221,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   sheetDescription: {
+    textAlign: "center",
+  },
+  resendSuccess: {
+    color: colours.surfaceDark,
     textAlign: "center",
   },
 });

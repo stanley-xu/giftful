@@ -164,6 +164,28 @@ export const auth = {
       return { data: null, error: error as Error };
     }
   },
+
+  /**
+   * Resend verification email to the given email address
+   */
+  async resendVerificationEmail(email: string): Promise<DbResult<boolean>> {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: "giftful://welcome",
+        },
+      });
+
+      if (error) throw error;
+
+      return { data: true, error: null };
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      return { data: null, error: error as Error };
+    }
+  },
 };
 
 // ============================================================================
