@@ -22,7 +22,6 @@ export default function AuthLayout() {
         }}
       />
       <Stack.Screen name="register" options={{ presentation: "modal" }} />
-      <Stack.Screen name="handoff" options={{ presentation: "modal" }} />
     </Stack>
   );
 }

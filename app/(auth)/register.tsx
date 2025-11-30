@@ -1,15 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthError } from "@supabase/supabase-js";
-import { router } from "expo-router";
+import { Mail } from "lucide-react-native";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { z } from "zod/v4";
 
 import { Button, Input, Text } from "@/components";
+import { BottomSheet } from "@/components/BottomSheet";
 import { useAuthContext } from "@/lib/auth";
 import { generateFakeUser } from "@/lib/fake-data";
 import { fullPageStyles } from "@/styles/styles";
-import { spacing } from "@/styles/tokens";
+import { colours, spacing } from "@/styles/tokens";
 
 const registerSchema = z
   .object({
@@ -26,6 +28,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
   const { signUp, loading } = useAuthContext();
+  const [showCheckEmail, setShowCheckEmail] = useState(false);
 
   const {
     control,
@@ -45,9 +48,7 @@ export default function RegisterScreen() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await signUp({ email: data.email, password: data.password });
-      // In local: navigation happens automatically via session state change
-      // In prod: email confirmation needs to be done
-      router.push("/(auth)/handoff");
+      setShowCheckEmail(true);
     } catch (e) {
       console.error(e);
       setError("root", { message: (e as Error).message });
@@ -67,7 +68,7 @@ export default function RegisterScreen() {
         email: fakeUser.email,
         password: fakeUser.password,
       });
-      // Navigation happens automatically via session state change
+      setShowCheckEmail(true);
     } catch (e) {
       const authError = e as AuthError;
       console.error(authError);
@@ -87,7 +88,6 @@ export default function RegisterScreen() {
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Email"
               placeholder="giver@giftful.io"
               value={value}
               onChangeText={onChange}
@@ -104,7 +104,6 @@ export default function RegisterScreen() {
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Password"
               placeholder="Enter your password"
               value={value}
               onChangeText={onChange}
@@ -120,7 +119,6 @@ export default function RegisterScreen() {
           name="confirmPassword"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Confirm Password"
               placeholder="Re-enter your password"
               value={value}
               onChangeText={onChange}
@@ -143,6 +141,22 @@ export default function RegisterScreen() {
           </Button>
         )}
       </View>
+
+      <BottomSheet
+        visible={showCheckEmail}
+        onClose={() => setShowCheckEmail(false)}
+        heightPercentage={0.35}
+        containerStyle={{ backgroundColor: colours.surface }}
+      >
+        <View style={styles.sheetContent}>
+          <Mail size={spacing.xs * 18} />
+          <Text style={styles.sheetTitle}>Hang tight!</Text>
+          <Text style={styles.sheetDescription}>
+            We sent a verification link to your email. Use the link to complete
+            your signup.
+          </Text>
+        </View>
+      </BottomSheet>
     </View>
   );
 }
@@ -150,6 +164,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     ...fullPageStyles.container,
+    backgroundColor: colours.surface,
     alignItems: "center",
   },
   form: {
@@ -158,4 +173,18 @@ const styles = StyleSheet.create({
   },
   title: fullPageStyles.title,
   subtitle: fullPageStyles.subtitle,
+  sheetContent: {
+    alignItems: "center",
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+    // backgroundColor: colours.surface,
+  },
+  sheetTitle: {
+    ...fullPageStyles.title,
+    textAlign: "center",
+  },
+  sheetDescription: {
+    textAlign: "center",
+  },
 });

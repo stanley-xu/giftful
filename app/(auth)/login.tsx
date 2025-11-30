@@ -6,7 +6,7 @@ import { z } from "zod/v4";
 import { Button, Input, Text } from "@/components";
 import { useAuthContext } from "@/lib/auth";
 import { fullPageStyles } from "@/styles/styles";
-import { spacing } from "@/styles/tokens";
+import { colours, spacing } from "@/styles/tokens";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email"),
@@ -64,8 +64,7 @@ export default function LoginScreen() {
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Email"
-              placeholder="Enter your email"
+              placeholder="giver@giftful.io"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -81,8 +80,7 @@ export default function LoginScreen() {
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Password"
-              placeholder="Enter your password"
+              placeholder="Password"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -126,7 +124,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: fullPageStyles.container,
+  container: {
+    ...fullPageStyles.container,
+    backgroundColor: colours.surface,
+  },
   form: {
     paddingTop: spacing["xl"],
     gap: spacing.md,
