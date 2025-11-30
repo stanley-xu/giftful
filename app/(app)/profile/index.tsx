@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Keyboard,
   Pressable,
+  RefreshControl,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -62,7 +63,7 @@ export default function ProfileScreen() {
           onPress={toggleExpand}
           style={[styles.collapsedHeaderContent]}
         >
-          <Text variant="semibold" fontSize="lg">
+          <Text variant="semibold" size="lg">
             {firstName}
           </Text>
           <Animated.View style={animatedChevronStyle}>
@@ -83,9 +84,19 @@ export default function ProfileScreen() {
   } = useWishlists();
   const [editingItem, setEditingItem] = useState<WishlistItemType | null>(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const memoRefetchWishlistItems = useCallback(() => {
     if (wishlists.length > 0 && !Features["multi-wishlists"]) {
       refetchWishlistItems(wishlists[0].id);
+    }
+  }, [refetchWishlistItems, wishlists]);
+
+  const handleRefresh = useCallback(async () => {
+    if (wishlists.length > 0 && !Features["multi-wishlists"]) {
+      setIsRefreshing(true);
+      await refetchWishlistItems(wishlists[0].id);
+      setIsRefreshing(false);
     }
   }, [refetchWishlistItems, wishlists]);
 
@@ -113,6 +124,13 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
         style={{ backgroundColor: colours.background }}
         contentContainerStyle={{ paddingBottom: 50 }} // Pad main content due to native tabs
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colours.accent}
+          />
+        }
       >
         <Pressable onPress={() => Keyboard.dismiss()}>
           <Animated.View style={animatedSpacerStyle} />
@@ -149,7 +167,7 @@ export default function ProfileScreen() {
           style={styles.bottomButton}
         >
           <CirclePlus color={colours.background} />
-          <Text variant="bold" fontSize="2xs">
+          <Text variant="bold" size="2xs">
             Add
           </Text>
         </Button>
