@@ -3,7 +3,7 @@ export const palette = {
   primary2: "hsl(148, 13%, 51%)",
   primary3: "hsl(162, 16%, 47%)",
   secondary: "hsl(9, 51%, 59%)",
-  secondaryDark: "hsl(9, 51%, 43%)",
+  secondaryDark: "hsl(9, 51%, 48%)",
   offwhite: "hsl(45, 55%, 91%)",
   white: "hsl(0, 0%, 97%)",
   black: "hsl(0, 0%, 15%)",
@@ -17,7 +17,7 @@ export const colours = {
   surfaceWarm: palette.primary2,
   surfaceDark: palette.primary3,
   accent: palette.primary3,
-  error: palette.secondary,
+  error: palette.secondaryDark,
   text: palette.black,
   border: "hsl(0, 0%, 88%)",
 } as const;
