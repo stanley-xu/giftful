@@ -50,10 +50,8 @@ export default function RegisterScreen() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      console.log("before");
       await signUp({ email: data.email, password: data.password });
       registeredEmailRef.current = data.email;
-      console.log(data.email);
       setResendSuccess(false);
       setShowCheckEmail(true);
     } catch (e) {
@@ -63,7 +61,6 @@ export default function RegisterScreen() {
   };
 
   const handleResendEmail = async () => {
-    console.log(registeredEmailRef.current);
     if (!registeredEmailRef.current) return;
 
     setIsResending(true);
@@ -99,9 +96,8 @@ export default function RegisterScreen() {
       setResendSuccess(false);
       setShowCheckEmail(true);
     } catch (e) {
-      const authError = e as AuthError;
-      console.error(authError);
-      setError("root", { message: authError.message });
+      console.error(e);
+      setError("root", { message: (e as Error).message });
     }
   };
 
